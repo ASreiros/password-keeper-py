@@ -1,7 +1,8 @@
 import tkinter
+from tkinter import messagebox
 import pandas
 import random
-
+import pyperclip
 import pandas as pd
 
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
@@ -37,7 +38,8 @@ def generate_password():
 	password_str = "".join(password)
 	input3.delete(0, tkinter.END)
 	input3.insert(0, password_str)
-
+	pyperclip.copy(password_str)
+	label4.config(text="Password ready for paste")
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 
 
@@ -50,33 +52,28 @@ def save_password():
 	if not website or not username or not password:
 		label4.config(text="Please fill all fields")
 		return
-	data = pandas.read_excel("data.xlsx", sheet_name="Sheet1", )
-	# data_dict = {row.website: {row.login: row.password} for (index, row) in data.iterrows()}
-	# if not data_dict.get(website):
-	# 	print("no website")
-	# else:
-	# 	data_dict[website] = {username: password}
-	# df = pandas.DataFrame()
-	new_dict = data.to_dict()
-	position = -1
-	for n in new_dict["website"]:
-		if new_dict["website"][n] == website:
-			if new_dict["login"][n] == username:
-				position = n
+	is_ok = messagebox.askokcancel(title=website, message=f"These are your details:\n Username: {username} \n "
+																	f"Password: {password} \n Is it ok to save?")
+	if is_ok:
+		data = pandas.read_excel("data.xlsx", sheet_name="Sheet1", )
+		new_dict = data.to_dict()
+		position = -1
+		for n in new_dict["website"]:
+			if new_dict["website"][n] == website:
+				if new_dict["login"][n] == username:
+					position = n
 
-	if position == -1:
-		next_nr = len(new_dict["website"])
-		new_dict["website"][next_nr] = website
-		new_dict["login"][next_nr] = username
-		new_dict["password"][next_nr] = password
-	else:
-		new_dict["password"][position] = password
-	df1 = pd.DataFrame.from_dict(new_dict)
-	df1.to_excel("data.xlsx", index=False)
-	input1.delete(0, tkinter.END)
-	input3.delete(0, tkinter.END)
-
-
+		if position == -1:
+			next_nr = len(new_dict["website"])
+			new_dict["website"][next_nr] = website
+			new_dict["login"][next_nr] = username
+			new_dict["password"][next_nr] = password
+		else:
+			new_dict["password"][position] = password
+		df1 = pd.DataFrame.from_dict(new_dict)
+		df1.to_excel("data.xlsx", index=False)
+		input1.delete(0, tkinter.END)
+		input3.delete(0, tkinter.END)
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -102,7 +99,7 @@ label3 = tkinter.Label(text="Password:", bg="white", anchor="e", width=15)
 label3.config(padx=10, pady=5)
 label3.grid(column=0, row=3)
 
-label4 = tkinter.Label(text="", bg="white", anchor="e", width=15, fg="red", font=("Arial", 12, "bold"))
+label4 = tkinter.Label(text="", bg="white", anchor="e", width=25, fg="red", font=("Arial", 12, "bold"))
 label4.config(padx=0, pady=5)
 label4.grid(column=1, row=5, columnspan=2)
 
