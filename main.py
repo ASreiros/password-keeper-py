@@ -42,6 +42,36 @@ def generate_password():
 	pyperclip.copy(password_str)
 	label4.config(text="Password ready for paste")
 # ---------------------------- SAVE PASSWORD ------------------------------- #
+def find_password():
+	label4.config(text="")
+	website = input1.get()
+	if len(website) == 0:
+		label4.config(text="First you need to enter website")
+		return
+	try:
+		data = pandas.read_excel("data.xlsx", sheet_name="Sheet1", )
+		new_dict = data.to_dict()
+	except FileNotFoundError:
+		label4.config(text="You dont have any data yet")
+	else:
+		counter = 0
+		position = []
+		for n in new_dict["website"]:
+			if new_dict["website"][n] == website:
+				position.append(n)
+		if len(position) > 0:
+			input2.delete(0, tkinter.END)
+			input2.insert(0, new_dict["login"][position[0]])
+			input3.delete(0, tkinter.END)
+			input3.insert(0, new_dict["password"][position[0]])
+			if len(position) != 1:
+				text = ""
+				for t in position:
+					text += "login: " + new_dict["login"][t] + "\n"
+					text += "password: " + new_dict["password"][t] + "\n \n"
+				messagebox.showinfo(title=website, message=text)
+		else:
+			messagebox.showerror(title=website, message=f"No username/password for {website}")
 
 
 def save_password():
@@ -59,7 +89,6 @@ def save_password():
 		try:
 			data = pandas.read_excel("data.xlsx", sheet_name="Sheet1", )
 			new_dict = data.to_dict()
-			print(new_dict)
 
 		except FileNotFoundError:
 			new_dict = {
@@ -114,10 +143,10 @@ label4.config(padx=0, pady=5)
 label4.grid(column=1, row=5, columnspan=2)
 
 
-input1 = tkinter.Entry(width=50)
+input1 = tkinter.Entry(width=31)
 input1.focus()
 input1.configure(bg="#FEFAE0")
-input1.grid(column=1, row=1, columnspan=2)
+input1.grid(column=1, row=1)
 
 input2 = tkinter.Entry(width=50)
 input2.configure(bg="#FEFAE0")
@@ -133,5 +162,8 @@ generate_button.grid(column=2, row=3)
 
 save_button = tkinter.Button(text="Save", command=save_password, width=43)
 save_button.grid(column=1, row=4, columnspan=2)
+
+search_button = tkinter.Button(text="Search", command=find_password, width=14)
+search_button.grid(column=2, row=1)
 
 window.mainloop()
