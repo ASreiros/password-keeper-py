@@ -4,6 +4,7 @@ import pandas
 import random
 import pyperclip
 import pandas as pd
+import json
 
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -55,14 +56,22 @@ def save_password():
 	is_ok = messagebox.askokcancel(title=website, message=f"These are your details:\n Username: {username} \n "
 																	f"Password: {password} \n Is it ok to save?")
 	if is_ok:
-		data = pandas.read_excel("data.xlsx", sheet_name="Sheet1", )
-		new_dict = data.to_dict()
+		try:
+			data = pandas.read_excel("data.xlsx", sheet_name="Sheet1", )
+			new_dict = data.to_dict()
+			print(new_dict)
+
+		except FileNotFoundError:
+			new_dict = {
+				'website': {},
+				'login': {},
+				'password': {}
+			}
 		position = -1
 		for n in new_dict["website"]:
 			if new_dict["website"][n] == website:
 				if new_dict["login"][n] == username:
 					position = n
-
 		if position == -1:
 			next_nr = len(new_dict["website"])
 			new_dict["website"][next_nr] = website
@@ -70,6 +79,7 @@ def save_password():
 			new_dict["password"][next_nr] = password
 		else:
 			new_dict["password"][position] = password
+
 		df1 = pd.DataFrame.from_dict(new_dict)
 		df1.to_excel("data.xlsx", index=False)
 		input1.delete(0, tkinter.END)
